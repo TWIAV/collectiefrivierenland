@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="https://collectiefrivierenland.nl/wp-content/uploads/2021/05/cropped-cropped-CollectiefRivierenland-800x300-1-32x32.png" sizes="32x32" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Viewer - Collectief Rivierenland</title>
+    <script>
+    function mail(_domain, _name, _target, _id, _subject) {
+      var _ad = _name;
+      _ad += "@";
+      _ad += _domain;
+      _ad += "?SUBJECT=";
+      _ad += _subject;
+      var tdom = document.getElementById(_target);
+      if (tdom)
+      {
+        tdom.innerHTML = (_id?_id:_ad);
+        tdom.href = "mailto:" + _ad;
+      }
+    }
+    </script>
+  </head>
+  <body onload="mail('gmail.com','e.j.h.polle','wm','vragen of opmerkingen','Viewer Collectief Rivierenland');mail('gmail.com','e.j.h.polle','wm2','e-mail','Viewer Collectief Rivierenland')">
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,354 @@
+@import "node_modules/ol/ol.css";
+
+/* body { */
+  /* overflow: hidden; */
+/* } */
+html, body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  font-family: sans-serif;
+}
+
+#header {	
+	width: 100%;
+    height: 70px;
+    background-color: #538780;
+    color:#FFFFFF;
+    margin: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+}
+#headertext {
+    float: left;
+    font-size: 35px;
+    color: white;
+    line-height: 70px;
+    padding-left: 180px;
+}
+.titlelink, .titlelink:hover {
+    text-decoration: none;
+    color: inherit;
+}
+#map {
+    position: absolute;
+    top: 70px;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    padding: 0;
+    margin: 0;
+}
+/* https://openlayers.org/en/latest/examples/popup.html */
+.ol-popup {
+  position: absolute;
+  background-color: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #cccccc;
+  bottom: 12px;
+  left: -50px;
+  min-width: 280px;
+  font-size: .8em;
+}
+.ol-popup:after, .ol-popup:before {
+  top: 100%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+.ol-popup:after {
+  border-top-color: white;
+  border-width: 10px;
+  left: 48px;
+  margin-left: -10px;
+}
+.ol-popup:before {
+  border-top-color: #cccccc;
+  border-width: 11px;
+  left: 48px;
+  margin-left: -11px;
+}
+.ol-popup-closer {
+  text-decoration: none;
+  color: #000000;
+  position: absolute;
+  top: 2px;
+  right: 8px;
+}
+.ol-popup-closer:after {
+  content: "✖";
+}
+a {
+  text-decoration: none;
+}
+#gh-a {
+  float: right;
+  margin-top: 17.5px;
+  padding-right: 15px;
+}
+.visible{
+  visibility: visible;
+}
+.invisible{
+  visibility: hidden;
+}
+.flex-end {
+  padding: 2px;
+  display: flex;
+  justify-content: flex-end;
+}
+.action-button {
+  margin-left:5px;
+  padding: 0.3em;
+  border: none;
+  border-radius: 8px;
+  text-align: center;
+  color: white;
+  background: #000000;
+  border: 1px solid white;
+  cursor: pointer;
+}
+.action-button:hover,
+.action-button:focus {
+  background-color: white;
+  color: #000000;
+  border: 1px solid #000000;
+}
+
+#addressSearchBar{
+  background: transparent;
+  font-size: 15px;
+  display: flex;
+  position: absolute;
+  top: 1em;
+  right: 0;
+  width: 20em;
+  height: 2.2em;
+  border-radius: 4px;
+}
+::-webkit-input-placeholder {
+  color: #ccc;
+  font-size: 15px;
+}
+:-moz-placeholder {
+  color: #ccc;
+  font-size: 15px;
+}
+::-moz-placeholder {
+  color: #ccc;
+  font-size: 15px;
+}
+:-ms-input-placeholder {
+  color: #ccc;
+  font-size: 15px;
+}
+input{
+  font-size: 15px;
+  border: solid 4px #eee;
+  border-radius: 4px;
+  outline: none;
+  width: 18.5em;
+}
+input:focus{
+    border: solid 4px #ddd !important;
+}
+.autocomplete > div.selected {
+    background: rgba(0,60,136,0.2);
+    cursor: pointer;
+}
+.autocomplete > div:hover:not(.group),
+.autocomplete > div.highlighted {
+    background: rgba(0,60,136,0.2);
+    cursor: pointer;
+}
+.tooltip {
+  border: solid .5px;
+  border-color: rgba(200,200,200,1);
+  border-radius: 4px;
+  position: relative;
+  padding: 10px;
+  background: white;
+  color: rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  font: 9pt sans-serif;
+}
+.tooltip::before {
+  content: '';
+  position: absolute;
+  display: block;    
+  width: 0px;        
+  left: 0;
+  top: 50%;
+  border: 5px solid transparent;
+  border-left: 0;
+  border-right: 15px solid #fff;
+  transform: translate(calc(-100%), -50%);
+}
+
+/* The JavaScript Toast is a small, nonblocking notification pop-up. */
+/* Inspiration taken from https://www.w3schools.com/howto/howto_js_snackbar.asp */
+/* -- start Toast -- */
+#toast {
+  visibility: hidden;
+  min-width: 250px;
+  margin-left: -125px;
+  background-color: #538780;
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  top: 100px;
+  font-size: 14px;
+}
+#toast.show {
+  visibility: visible;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  animation-iteration-count: 0;
+}
+@-webkit-keyframes fadein {
+  from {top: 0; opacity: 0;} 
+  to {top: 100px; opacity: 1;}
+}
+@keyframes fadein {
+  from {top: 0; opacity: 0;}
+  to {top: 100px; opacity: 1;}
+}
+@-webkit-keyframes fadeout {
+  from {top: 100px; opacity: 1;} 
+  to {top: 0; opacity: 0;}
+}
+@keyframes fadeout {
+  from {top: 100px; opacity: 1;}
+  to {top: 0; opacity: 0;}
+}
+/* -- end Toast -- */
+/* -- start Modal -- */
+/* Example taken from: https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal_bottom*/
+/* The Modal (background) */
+.ol-modal {
+  display: block; /* Shown by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: #5387801A;
+  -webkit-animation-name: fadeIn; /* Fade in the background */
+  -webkit-animation-duration: 0.4s;
+  animation-name: fadeIn;
+  animation-duration: 0.4s
+}
+/* Modal Content */
+.ol-modal-content {
+  position: fixed;
+  bottom: 0;
+  background-color: #5387801A;
+  width: 100%;
+  -webkit-animation-name: slideIn;
+  -webkit-animation-duration: 0.4s;
+  animation-name: slideIn;
+  animation-duration: 0.4s
+}
+/* The Close Button */
+.ol-modal-close {
+  position: absolute;
+  top: 2px;
+  right: 8px;
+  color: white;
+  /* float: right; */
+  font-size: 1.5em;
+  font-weight: bold;
+}
+.ol-modal-close:hover,
+.ol-modal-close:focus {
+  color: #538780;
+  text-decoration: none;
+  cursor: pointer;
+}
+.ol-modal-header {
+  padding: 2px 16px;
+  background-color: #538780B3;
+  color: white;
+}
+.ol-modal-body {
+  padding: 2px 16px;
+  background-color: #ffefee;
+}
+.ol-modal-footer {
+  padding: 2px 16px;
+  background-color: #538780;
+  color: white;
+  font-size: .8em;
+}
+.ol-modal-table-data {
+  width: 50%;
+  padding-right: 40px;
+  vertical-align: top;
+  font-size: .9em;
+}
+div.ol-modal-footer a,
+div.ol-modal-footer a:visited {
+  color: #321563;
+}
+div.ol-modal-body a,
+div.ol-modal-body a:visited {
+  color: #8472A1;
+}
+div.ol-modal-body a:hover,
+div.ol-modal-body a:focus {
+  color: #321563;
+}
+div.ol-modal-footer a:hover,
+div.ol-modal-footer a:focus {
+  color: #8472A1;
+}
+.start-button {
+  margin-left:5px;
+  padding: 0.3em;
+  border: none;
+  border-radius: 8px;
+  text-align: center;
+  color: white;
+  background: #538780;
+  border: 1px solid #538780;
+  cursor: pointer;
+}
+.start-button:hover,
+.start-button:focus {
+  background-color: white;
+  color: #538780;
+  border: 1px solid #538780;
+}
+
+/* Add Animation */
+@-webkit-keyframes slideIn {
+  from {bottom: -300px; opacity: 0} 
+  to {bottom: 0; opacity: 1}
+}
+@keyframes slideIn {
+  from {bottom: -300px; opacity: 0}
+  to {bottom: 0; opacity: 1}
+}
+@-webkit-keyframes fadeIn {
+  from {opacity: 0} 
+  to {opacity: 1}
+}
+@keyframes fadeIn {
+  from {opacity: 0} 
+  to {opacity: 1}
+}
+/* -- end Modal -- */
