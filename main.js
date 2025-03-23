@@ -407,6 +407,8 @@ map.on('click', function (evt) {
             info += features[0].get('perceelnummer') + '</b><br>'; 
             info += '- Oppervlakte: <b>' + new Intl.NumberFormat('nll-NL').format(features[0].get('kadastraleGrootteWaarde')) + ' m<sup>2</sup></b>'; 
           }
+          tooltipinfo.innerHTML = info;
+          tooltipOverlay.setPosition(evt.coordinate);
         });
     }
     if (heightUrl) {
@@ -425,7 +427,8 @@ map.on('click', function (evt) {
           } else {
             info += '- geen AHN hoogtegegevens</b>';
           }
-          tooltipinfo.innerHTML = info; // Ik weet niet waarom, maar deze moet hier staan, anders werkt het niet
+          tooltipinfo.innerHTML = info;
+          tooltipOverlay.setPosition(evt.coordinate);
         });
     }
   } 
