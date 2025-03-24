@@ -12,7 +12,7 @@
   "dependencies": {
     "autocompleter": "^9.3.2",
     "ol": "^10.2.1",
-    "ol-ext": "^4.0.27",
+    "ol-ext": "^4.0.29",
     "ol-layerswitcher": "^4.1.2"
   }
 }
