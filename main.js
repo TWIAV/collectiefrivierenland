@@ -342,103 +342,107 @@ let collectiefSelected = [];
 
 map.on('click', function (evt) {
   searchResultVectorSource.clear();
-  const viewResolution = /** @type {number} */ (map.getView().getResolution());
-  let parcelUrl = '';
-  let heightUrl = '';
-  let info = '';
-  for (let i = 0; i < collectiefSelected.length; i++) { collectiefSelected[i].setStyle(undefined); collectiefSelected.splice(i,1); }
-  for (let i = 0; i < anvSelected.length; i++) { anvSelected[i].setStyle(undefined); anvSelected.splice(i,1); }
-  map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-    const layerID = layer.get('id');
-    if (feature && layerID === 'collectiefRegions') {
-      if (info.length > 0) {
-        info += '<br>---------------<br>';
+  selectedParcelSource.clear();
+  tooltipOverlay.setPosition(undefined);
+  if (!reverseGeocoding) { // do no no show tooltip when reverse geocoding is activated
+    const viewResolution = /** @type {number} */ (map.getView().getResolution());
+    let parcelUrl = '';
+    let heightUrl = '';
+    let info = '';
+    for (let i = 0; i < collectiefSelected.length; i++) { collectiefSelected[i].setStyle(undefined); collectiefSelected.splice(i,1); }
+    for (let i = 0; i < anvSelected.length; i++) { anvSelected[i].setStyle(undefined); anvSelected.splice(i,1); }
+    map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+      const layerID = layer.get('id');
+      if (feature && layerID === 'collectiefRegions') {
+        if (info.length > 0) {
+          info += '<br>---------------<br>';
+        }
+        info += '<b>Agrarisch Collectief (BoerenNatuur)</b><br>';
+        const coll = feature;
+        collectiefSelected.push(coll);
+        info += '<b> - <a target="_blank" href="' + feature.get('website') + '">' + feature.get('naam') + '</a></b>';
+        feature.setStyle(collectiefFeatureHighlightStyle);
       }
-      info += '<b>Agrarisch Collectief (BoerenNatuur)</b><br>';
-      const coll = feature;
-      collectiefSelected.push(coll);
-      info += '<b> - <a target="_blank" href="' + feature.get('website') + '">' + feature.get('naam') + '</a></b>';
-      feature.setStyle(collectiefFeatureHighlightStyle);
-    }
-    if (feature && layerID === 'anvRegions') {
-      if (info.length > 0) {
-        info += '<br>---------------<br>';
+      if (feature && layerID === 'anvRegions') {
+        if (info.length > 0) {
+          info += '<br>---------------<br>';
+        }
+        info += '<b>Collectief Rivierenland</b><br>';
+        const anv = feature;
+        anvSelected.push(anv);
+        info += '<b> - Agrarische Natuurvereniging <a target="_blank" href="' + feature.get('website') + '">' + feature.get('naam') + '</a></b>';
+        feature.setStyle(anvFeatureHighlightStyle);
       }
-      info += '<b>Collectief Rivierenland</b><br>';
-      const anv = feature;
-      anvSelected.push(anv);
-      info += '<b> - Agrarische Natuurvereniging <a target="_blank" href="' + feature.get('website') + '">' + feature.get('naam') + '</a></b>';
-      feature.setStyle(anvFeatureHighlightStyle);
+    })
+    if (brkLayerGroup.get('visible') && viewResolution < 1.20) {
+      map.getTargetElement().style.cursor = 'pointer';
+      parcelUrl = parcelSource.getFeatureInfoUrl(
+        evt.coordinate,
+        viewResolution,
+        projection,
+        {'INFO_FORMAT': 'application/json'}
+      );
     }
-  })
-  if (brkLayerGroup.get('visible') && viewResolution < 1.20) {
-    map.getTargetElement().style.cursor = 'pointer';
-    parcelUrl = parcelSource.getFeatureInfoUrl(
-      evt.coordinate,
-      viewResolution,
-      projection,
-      {'INFO_FORMAT': 'application/json'}
-    );
-  }
-  if (ahnLayer.get('visible')) {
-    heightUrl = heightSource.getFeatureInfoUrl(
-      evt.coordinate,
-      viewResolution,
-      projection,
-      {'INFO_FORMAT': 'application/json'}
-    );
-  }
-  if (parcelUrl || heightUrl) {
-    if (parcelUrl) {
-      fetch(parcelUrl)
-        .then((response) => response.text())
-        .then(function (json) {
-          const features = new GeoJSON().readFeatures(json);
-          selectedParcelSource.clear();
-          selectedParcelSource.addFeatures(features);
-          if (info.length > 0) {
-            info += '<br>---------------<br>';
-          }
-          if (features.length > 0) {
-            info += '<b>Kadastrale gegevens</b><br>';
-            info += '- Kadastrale Gemeente: <b>' + features[0].get('kadastraleGemeenteWaarde') + '</b><br>';
-            info += '- Perceelnummer: <b>' + features[0].get('AKRKadastraleGemeenteCodeWaarde') + ' ';
-            info += features[0].get('sectie') + ' '; 
-            info += features[0].get('perceelnummer') + '</b><br>'; 
-            info += '- Oppervlakte: <b>' + new Intl.NumberFormat('nll-NL').format(features[0].get('kadastraleGrootteWaarde')) + ' m<sup>2</sup></b>'; 
-          }
-          tooltipinfo.innerHTML = info;
-          tooltipOverlay.setPosition(evt.coordinate);
-        });
+    if (ahnLayer.get('visible')) {
+      heightUrl = heightSource.getFeatureInfoUrl(
+        evt.coordinate,
+        viewResolution,
+        projection,
+        {'INFO_FORMAT': 'application/json'}
+      );
     }
-    if (heightUrl) {
-      fetch(heightUrl)
-        .then((response) => response.text())
-        .then(function (json) {
-          const features = new GeoJSON().readFeatures(json);
-          if (info.length > 0) {
-            info += '<br>---------------<br>';
-          }
-          if (features.length > 0) {
-            const pointClicked = new Feature({'geometry': new Point(evt.coordinate)});
-            searchResultVectorSource.addFeature(pointClicked);
-            info += '<b>AHN Hoogtegegevens</b><br>';
-            info += '- Hoogte: <b>' + parseFloat(features[0].get('value_list')).toFixed(2) + ' m t.o.v. NAP</b>';
-          } else {
-            info += '- geen AHN hoogtegegevens</b>';
-          }
-          tooltipinfo.innerHTML = info;
-          tooltipOverlay.setPosition(evt.coordinate);
-        });
+    if (parcelUrl || heightUrl) {
+      if (parcelUrl) {
+        fetch(parcelUrl)
+          .then((response) => response.text())
+          .then(function (json) {
+            const features = new GeoJSON().readFeatures(json);
+            selectedParcelSource.clear();
+            selectedParcelSource.addFeatures(features);
+            if (info.length > 0) {
+              info += '<br>---------------<br>';
+            }
+            if (features.length > 0) {
+              info += '<b>Kadastrale gegevens</b><br>';
+              info += '- Kadastrale Gemeente: <b>' + features[0].get('kadastraleGemeenteWaarde') + '</b><br>';
+              info += '- Perceelnummer: <b>' + features[0].get('AKRKadastraleGemeenteCodeWaarde') + ' ';
+              info += features[0].get('sectie') + ' '; 
+              info += features[0].get('perceelnummer') + '</b><br>'; 
+              info += '- Oppervlakte: <b>' + new Intl.NumberFormat('nll-NL').format(features[0].get('kadastraleGrootteWaarde')) + ' m<sup>2</sup></b>'; 
+            }
+            tooltipinfo.innerHTML = info;
+            tooltipOverlay.setPosition(evt.coordinate);
+          });
+      }
+      if (heightUrl) {
+        fetch(heightUrl)
+          .then((response) => response.text())
+          .then(function (json) {
+            const features = new GeoJSON().readFeatures(json);
+            if (info.length > 0) {
+              info += '<br>---------------<br>';
+            }
+            if (features.length > 0) {
+              const pointClicked = new Feature({'geometry': new Point(evt.coordinate)});
+              searchResultVectorSource.addFeature(pointClicked);
+              info += '<b>AHN Hoogtegegevens</b><br>';
+              info += '- Hoogte: <b>' + parseFloat(features[0].get('value_list')).toFixed(2) + ' m t.o.v. NAP</b>';
+            } else {
+              info += '- geen AHN hoogtegegevens</b>';
+            }
+            tooltipinfo.innerHTML = info;
+            tooltipOverlay.setPosition(evt.coordinate);
+          });
+      }
+    } 
+    tooltipinfo.innerHTML = info;
+    if (info.length > 0) {
+      tooltipOverlay.setPosition(evt.coordinate);
+    } else {
+      selectedParcelSource.clear();
+      tooltipOverlay.setPosition(undefined);
+      map.getTargetElement().style.cursor = '';
     }
-  } 
-  tooltipinfo.innerHTML = info;
-  if (info.length > 0) {
-    tooltipOverlay.setPosition(evt.coordinate);
-  } else {
-    selectedParcelSource.clear();
-    tooltipOverlay.setPosition(undefined);
-    map.getTargetElement().style.cursor = '';
   }
 });
 
@@ -566,6 +570,8 @@ class LocationServerControl extends Control {
             const address = data.response.docs[0].weergavenaam;
             header.innerHTML = '';
             content.innerHTML = '<p>' + address + '</p>';
+            copyAddressBtn.style.display = "none";
+            copyCoordinatesBtn.style.display = "none";
             addressPopup.setPosition(coord);
             map.getView().fit(ext, {size: map.getSize(), padding: padding, maxZoom: 14});
           })
